@@ -1,0 +1,5 @@
+ext {
+    flywayUrl = "jdbc:h2:mem:sfpdb"
+    flywayUser = "sa"
+    flywayPassword = ""
+}

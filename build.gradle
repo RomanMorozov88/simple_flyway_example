@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'org.springframework.boot' version '2.4.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.flywaydb.flyway' version '7.15.0'
+}
+
+apply from: "build-test.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+group = 'morozov.ru'
+version = '0.0.1'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+println "DB url: " + flywayUrl
+println "DB user: " + flywayUser
+println "DB password: " + flywayPassword
+flyway {
+    url = "${flywayUrl}"
+    user = "${flywayUser}"
+    password = "${flywayPassword}"
+    schemas = ['public']
+    locations = ['filesystem:./src/main/resources/db/migration']
+    group = true
+    cleanDisabled = true
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-jdbc')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    
+    compile group: 'org.flywaydb', name: 'flyway-core', version: '7.15.0'
+    
+    compile('com.h2database:h2:1.4.199')
+}

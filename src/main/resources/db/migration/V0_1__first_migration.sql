@@ -14,7 +14,7 @@ CREATE TABLE blocks (
 CREATE TABLE local_date_blocks (
     id integer NOT NULL PRIMARY KEY REFERENCES blocks (id) 
     ON UPDATE RESTRICT ON DELETE CASCADE,
-    firs_date date not NULL,
+    first_date date not NULL,
     second_date date not NULL
 );
 

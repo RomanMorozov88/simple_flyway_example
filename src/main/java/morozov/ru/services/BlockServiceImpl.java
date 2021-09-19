@@ -4,80 +4,57 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.sql.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.stereotype.Service;
 
 import morozov.ru.enums.TypeEnum;
 import morozov.ru.models.Block;
 import morozov.ru.models.LocalDateBlock;
 import morozov.ru.models.TextBlock;
 
+/**
+ * Methods from this servise are callint from PackService 
+ * and have not transaction wrapper - to avoid mistakes and conflicts 
+ * with transactions commits
+ * @author morozov
+ *
+ */
+@Service("without_transactional")
 public class BlockServiceImpl implements BlockService {
-
-	private BlockDao blockDao;
-	private PlatformTransactionManager transactionManager;
-
-	@Autowired
-	public BlockServiceImpl(
-			BlockDao blockDao, 
-			PlatformTransactionManager transactionManager
-			) {
-		this.blockDao = blockDao;
-		this.transactionManager = transactionManager;
-	}
 	
+	private BlockDao blockDao;
+	
+	@Autowired
+	public BlockServiceImpl(BlockDao blockDao) {
+		this.blockDao = blockDao;
+	}
+
 	@Override
 	public Integer saveBlock(Block block) {
 		Integer idBlock = null;
-		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-	      def.setReadOnly(false);
-	      def.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-	      def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-	      TransactionStatus status = transactionManager.getTransaction(def);
-	      try {
-	    	  idBlock = blockDao.saveBlock(block);
-	    	  this.saveTypedBlock(idBlock, block);
-	          transactionManager.commit(status);
-	      } catch (Exception e) {
-	          e.printStackTrace();
-	          transactionManager.rollback(status);
-	      }
-	      return idBlock;
-	}
-
-	private void saveTypedBlock(Integer idBlock, Block block) {
-		block.setId(idBlock);
 		if (block.getClass() == TextBlock.class) {
 			block.setTypeCode(TypeEnum.TEXT_BLOCK.getCode());
+			idBlock = blockDao.saveBlock(block);
+			block.setId(idBlock);
 			blockDao.saveTextBlock((TextBlock) block);
 		} else if (block.getClass() == LocalDateBlock.class) {
 			block.setTypeCode(TypeEnum.LOCAL_DATE_BLOCK.getCode());
-			blockDao.saveTextBlock((TextBlock) block);
+			idBlock = blockDao.saveBlock(block);
+			block.setId(idBlock);
+			blockDao.saveLocalDateBlock((LocalDateBlock) block);
 		}
-	}
-
-	@Override
-	public void updateBlock(Block block) {
-		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-	      def.setReadOnly(false);
-	      def.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-	      def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-	      TransactionStatus status = transactionManager.getTransaction(def);
-	      try {
-	    	  blockDao.updateBlock(block);
-	    	  this.updateTypedBlock(block);
-	          transactionManager.commit(status);
-	      } catch (Exception e) {
-	          e.printStackTrace();
-	          transactionManager.rollback(status);
-	      }
+		return idBlock;
 	}
 	
-	private void updateTypedBlock(Block block) {
+	@Override
+	public void updateBlock(Block block) {
+		blockDao.updateBlock(block);
+		this.updateTypedBlock(block);
+	}
+	
+	private void updateTypedBlock(Block block) throws ClassCastException {
 		if (block.getTypeCode() == TypeEnum.TEXT_BLOCK.getCode()) {
 			blockDao.updateTextBlock((TextBlock) block);
 		} else if (block.getTypeCode() == TypeEnum.LOCAL_DATE_BLOCK.getCode()) {
@@ -92,20 +69,7 @@ public class BlockServiceImpl implements BlockService {
 
 	@Override
 	public List<Block> getBlocksByIdPack(int idPack) {
-		List<Block> result = null;
-      DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-      def.setReadOnly(false);
-      def.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-      def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-      TransactionStatus status = transactionManager.getTransaction(def);
-      try {
-          result = this.combineBlocks(blockDao.getBlocksByIdPack(idPack));
-          transactionManager.commit(status);
-      } catch (Exception e) {
-          e.printStackTrace();
-          transactionManager.rollback(status);
-      }
-		return result;
+		return this.combineBlocks(blockDao.getBlocksByIdPack(idPack));
 	}
 	
 	private List<Block> combineBlocks(List<Map<String, Object>>rawBlocks) {
@@ -131,8 +95,10 @@ public class BlockServiceImpl implements BlockService {
 			result.setId((Integer) rawBlock.get("id"));
 			result.setIdPack((Integer) rawBlock.get("id_pack"));
 			result.setName((String) rawBlock.get("name"));
-			((LocalDateBlock) result).setFirstDate((LocalDate) rawBlock.get("first_date"));
-			((LocalDateBlock) result).setSecondDate((LocalDate) rawBlock.get("second_date"));
+			LocalDate ld = ((Date) rawBlock.get("first_date")).toLocalDate();
+			((LocalDateBlock) result).setFirstDate(ld);
+			ld = ((Date) rawBlock.get("second_date")).toLocalDate();
+			((LocalDateBlock) result).setSecondDate(ld);
 			result.setTypeCode(typeCode);
 		}
 		return result;

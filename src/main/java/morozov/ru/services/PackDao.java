@@ -7,9 +7,11 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.stereotype.Repository;
 
 import morozov.ru.models.Pack;
 
+@Repository
 public class PackDao {
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;

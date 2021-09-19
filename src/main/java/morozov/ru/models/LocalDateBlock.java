@@ -2,12 +2,15 @@ package morozov.ru.models;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("LocalDateBlock")
 public class LocalDateBlock extends Block {
 	
+	@JsonFormat(pattern="yyyy-MM-dd")
 	private LocalDate firstDate;
+	@JsonFormat(pattern="yyyy-MM-dd")
 	private LocalDate secondDate;
 	
 	public LocalDateBlock() {

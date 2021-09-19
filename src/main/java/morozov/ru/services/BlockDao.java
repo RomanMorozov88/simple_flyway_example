@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.stereotype.Repository;
 
 import morozov.ru.models.Block;
 import morozov.ru.models.LocalDateBlock;
 import morozov.ru.models.TextBlock;
 
+@Repository
 public class BlockDao {
 	
 	private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -55,7 +57,7 @@ public class BlockDao {
 		String sql = "insert into text_blocks (id, text) "
 				+ "values(:idBlock, :text);";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", block.getIdPack());
+		parameters.addValue("idBlock", block.getId());
 		parameters.addValue("text", block.getText());
 		jdbcTemplate.update(sql, parameters);
 	}
@@ -65,7 +67,7 @@ public class BlockDao {
 				+ "set text = :text "
 				+ "where id = :idBlock;";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", block.getIdPack());
+		parameters.addValue("idBlock", block.getId());
 		parameters.addValue("text", block.getText());
 		jdbcTemplate.update(sql, parameters);
 	}
@@ -75,7 +77,7 @@ public class BlockDao {
 				+ "(id, first_date, second_date) "
 				+ "values(:idBlock, :fDate, :sDate);";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", block.getIdPack());
+		parameters.addValue("idBlock", block.getId());
 		parameters.addValue("fDate", block.getFirstDate());
 		parameters.addValue("sDate", block.getSecondDate());
 		jdbcTemplate.update(sql, parameters);
@@ -87,18 +89,18 @@ public class BlockDao {
 					+ "second_date = :sDate "
 					+ "where id = :idBlock;";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", block.getIdPack());
+		parameters.addValue("idBlock", block.getId());
 		parameters.addValue("fDate", block.getFirstDate());
 		parameters.addValue("sDate", block.getSecondDate());
 		jdbcTemplate.update(sql, parameters);
 	}
 	
 	public List<Map<String, Object>> getBlocksByIdPack(int idPack) {
-        String sql = "select b.id, b.id_pack, b.name, "
+        String sql = "select b.id, b.id_pack, b.name, b.type_code, "
         		+ "tb.text, ldb.first_date, ldb.second_date "
         		+ "from blocks as b "
         		+ "left join text_blocks as tb on tb.id = b.id "
-        		+ "left join locale_date_blocks as ldb on ldb.id = b.id "
+        		+ "left join local_date_blocks as ldb on ldb.id = b.id "
         		+ "where b.id_pack = :idPack;";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("idPack", idPack);

@@ -1,10 +1,6 @@
 spring:
   profiles:
     active: test
-  servlet:
-    multipart:
-      max-file-size: -1
-      max-request-size: -1
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -17,11 +13,6 @@ server:
   tomcat:
     remote_ip_header: x-forwarded-for
     protocol_header: x-forwarded-proto
-  servlet:
-    session:
-      timeout: 4320m
-      cookie:
-        max-age: 4320m
 
 server-properties:
   scheme: http

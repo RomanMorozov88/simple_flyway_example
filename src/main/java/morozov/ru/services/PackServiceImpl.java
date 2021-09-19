@@ -3,6 +3,8 @@ package morozov.ru.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -11,6 +13,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import morozov.ru.models.Block;
 import morozov.ru.models.Pack;
 
+@Service
 public class PackServiceImpl implements PackService {
 	
 	private PackDao packDao;
@@ -20,7 +23,7 @@ public class PackServiceImpl implements PackService {
 	@Autowired
 	public PackServiceImpl(
 			PackDao packDao, 
-			BlockService blockService, 
+			@Qualifier ("without_transactional") BlockService blockService, 
 			PlatformTransactionManager transactionManager
 			) {
 		super();
@@ -29,6 +32,7 @@ public class PackServiceImpl implements PackService {
 		this.transactionManager = transactionManager;
 	}
 
+	@SuppressWarnings("finally")
 	@Override
 	public Integer savePack(Pack pack) {
 		Integer idPack = null;
@@ -43,9 +47,11 @@ public class PackServiceImpl implements PackService {
 	          transactionManager.commit(status);
 	      } catch (Exception e) {
 	          e.printStackTrace();
+	          idPack = -101;
 	          transactionManager.rollback(status);
+	      } finally {
+	    	  return idPack;
 	      }
-	      return idPack;
 	}
 	
 	private void saveBlocks(int idPack, List<Block> blocks) {
@@ -88,6 +94,7 @@ public class PackServiceImpl implements PackService {
 		packDao.deletePack(idPack);
 	}
 
+	@SuppressWarnings("finally")
 	@Override
 	public Pack getPack(int idPack) {
 		Pack result = null;
@@ -102,11 +109,14 @@ public class PackServiceImpl implements PackService {
 	          transactionManager.commit(status);
 	      } catch (Exception e) {
 	          e.printStackTrace();
+	          result = null;
 	          transactionManager.rollback(status);
+	      } finally {
+	    	  return result;
 	      }
-	      return result;
 	}
 
+	@SuppressWarnings("finally")
 	@Override
 	public List<Pack> getPacks() {
 		List<Pack> resultList = null;
@@ -123,9 +133,11 @@ public class PackServiceImpl implements PackService {
 	          transactionManager.commit(status);
 	      } catch (Exception e) {
 	          e.printStackTrace();
+	          resultList = null;
 	          transactionManager.rollback(status);
+	      } finally {
+	    	  return resultList;
 	      }
-	      return resultList;
 	}
 	
 	

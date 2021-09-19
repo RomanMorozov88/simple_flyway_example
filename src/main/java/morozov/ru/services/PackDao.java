@@ -42,15 +42,15 @@ public class PackDao {
 		String sql = "delete from packs " 
 					+ "where id = :idPack;";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", idPack);
+		parameters.addValue("idPack", idPack);
 		jdbcTemplate.update(sql, parameters);
 	}
 
 	public Pack getPackById(int idPack) {
-		String sql = "select * from packs" 
+		String sql = "select * from packs " 
 					+ "where id = :idPack;";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("idBlock", idPack);
+		parameters.addValue("idPack", idPack);
 		try {
 			return jdbcTemplate.queryForObject(
 					sql, 

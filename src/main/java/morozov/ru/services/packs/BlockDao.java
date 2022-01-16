@@ -1,4 +1,4 @@
-package morozov.ru.services;
+package morozov.ru.services.packs;
 
 import java.util.List;
 import java.util.Map;

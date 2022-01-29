@@ -1,12 +1,6 @@
 package morozov.ru.services.files;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +9,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import morozov.ru.models.FileInfo;
@@ -23,13 +16,18 @@ import morozov.ru.models.FileInfo;
 @Service
 public class FileInfoServiceImpl implements FileInfoService {
 	
+	private FileStoreService fileStoreService;
 	private FileInfoDao fileInfoDao;
+	
 	private PlatformTransactionManager transactionManager;
-	private final String filesLocation = "resource/files";
 	
 	@Autowired
-	public FileInfoServiceImpl(FileInfoDao fileInfoDao, PlatformTransactionManager transactionManager) {
-		super();
+	public FileInfoServiceImpl(
+			FileStoreService fileStoreService,
+			FileInfoDao fileInfoDao, 
+			PlatformTransactionManager transactionManager
+			) {
+		this.fileStoreService = fileStoreService;
 		this.fileInfoDao = fileInfoDao;
 		this.transactionManager = transactionManager;
 	}
@@ -44,16 +42,8 @@ public class FileInfoServiceImpl implements FileInfoService {
 	      def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 	      TransactionStatus status = transactionManager.getTransaction(def);
 	      try {
-	    	  Path location = Paths.get(filesLocation);
-	          this.checkFolder(location.toString());
-	          String filePath = this.saveFile(firstFile, location);
-	            if (filePath != null) {
-	                fileInfo.setFirstFilePath(filePath);
-	            }
-	            filePath = this.saveFile(secondFile, location);
-	            if (filePath != null) {
-	                fileInfo.setSecondFilePath(filePath);
-	            }
+	    	  fileInfo.setFirstFilePath(fileStoreService.saveFile(firstFile));
+	    	  fileInfo.setSecondFilePath(fileStoreService.saveFile(secondFile));
 	    	  idResult = fileInfoDao.save(fileInfo);
 	          transactionManager.commit(status);
 	      } catch (Exception e) {
@@ -84,8 +74,8 @@ public class FileInfoServiceImpl implements FileInfoService {
 	      TransactionStatus status = transactionManager.getTransaction(def);
 		try {
 			FileInfo fileInfo = fileInfoDao.getFileInfoById(idFileInfo);
-			this.deleteFile(fileInfo.getFirstFilePath());
-			this.deleteFile(fileInfo.getSecondFilePath());
+			fileStoreService.deleteFile(fileInfo.getFirstFilePath());
+			fileStoreService.deleteFile(fileInfo.getSecondFilePath());
 			fileInfoDao.deleteFileInfo(idFileInfo);
 			transactionManager.commit(status);
 		} catch (IOException e) {
@@ -94,44 +84,5 @@ public class FileInfoServiceImpl implements FileInfoService {
 		}
 		
 	}
-	
-	private void checkFolder(String pathFolder) {
-        File folder = new File(pathFolder);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-    }
-	
-	private String saveFile(MultipartFile file, Path location) throws Exception {
-        String result = null;
-        if (file != null && !file.isEmpty()) {
-            result = this.storeFile(file, location);
-        }
-        return result;
-    }
-	
-	private String storeFile(
-            MultipartFile file,
-            Path location
-    ) throws Exception {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        if (file.isEmpty()) {
-            throw new Exception("Failed to store empty file " + fileName);
-        }
-        if (fileName.contains("..")) {
-            throw new Exception(
-                    "Cannot store file with relative path outside current directory "
-                            + fileName);
-        }
-        Path path = location.resolve(fileName);
-        try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
-        }
-        return path.toString();
-    }
-	
-	private void deleteFile(String path) throws IOException {
-        Files.delete(Paths.get(path));
-    }
 
 }

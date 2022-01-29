@@ -38,9 +38,9 @@ public class FileInfoController {
 	public ResponseEntity<?> saveBanner(
 			@RequestPart("fileInfo") FileInfo fileInfo,
 			@RequestPart("firstFile") MultipartFile firstFile, 
-			@RequestPart("secondFile") MultipartFile msecondFile
+			@RequestPart("secondFile") MultipartFile secondFile
 			) {
-		int idBanner = fileInfoService.saveFileInfo(fileInfo, firstFile, msecondFile);
+		int idBanner = fileInfoService.saveFileInfo(fileInfo, firstFile, secondFile);
 		return ResponseEntity.ok().body("{\"idBanner\":\"" + idBanner + "\"}");
 	}
 

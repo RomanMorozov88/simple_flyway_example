@@ -2,9 +2,18 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <title>FILES</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<div>
+    <form id = "file_form">
+        <div><input type="text" id = "name" name="name" placeholder="name" /></div>
+        <div><input type="file" id = "firstFile" name="firstFile"></div>
+        <div><input type="file" id = "secondFile" name="secondFile"></div>
+        <div><button type="submit">Добавить</button></div>
+    </form>
+</div>
+<script type="text/javascript" th:src="@{/file_sender.js}"></script>
 </body>
 </html>

@@ -6,9 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import morozov.ru.models.FileInfo;
 
-public interface FileService {
+public interface FileInfoService {
 	
-	int saveBanner(FileInfo fileInfo, MultipartFile firstFile, MultipartFile secondFile);
+	int saveFileInfo(FileInfo fileInfo, MultipartFile firstFile, MultipartFile secondFile);
 	
 	FileInfo getFileInfoById(int idFileInfo);
 	

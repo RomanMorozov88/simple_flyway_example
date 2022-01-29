@@ -11,6 +11,14 @@ public class FileInfo {
 		super();
 	}
     
+	public FileInfo(int id, String name, String firstFilePath, String secondFilePath) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.firstFilePath = firstFilePath;
+		this.secondFilePath = secondFilePath;
+	}
+
 	public int getId() {
 		return id;
 	}

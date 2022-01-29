@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import morozov.ru.models.Pack;
 import morozov.ru.services.packs.PackService;
@@ -16,11 +17,20 @@ import morozov.ru.services.packs.PackService;
 @RequestMapping("packs")
 public class PackController {
 	
+	private static final String VIEW = "packs";
+	
 	private PackService packService;
 
 	@Autowired
 	public PackController(PackService packService) {
 		this.packService = packService;
+	}
+	
+	@GetMapping("/")
+	public ModelAndView index() {
+		ModelAndView modelAndView = new ModelAndView(VIEW);
+		modelAndView.addObject("packs", packService.getPacks());
+		return modelAndView;
 	}
 	
 	@PostMapping("/savePack")

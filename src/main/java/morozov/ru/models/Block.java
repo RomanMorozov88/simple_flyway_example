@@ -19,6 +19,12 @@ public class Block {
 		super();
 	}
 
+	public Block(String name, int typeCode) {
+		super();
+		this.name = name;
+		this.typeCode = typeCode;
+	}
+
 	public int getId() {
 		return id;
 	}

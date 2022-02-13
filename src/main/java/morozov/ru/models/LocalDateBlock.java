@@ -16,6 +16,16 @@ public class LocalDateBlock extends Block {
 	public LocalDateBlock() {
 		super();
 	}
+	
+	public LocalDateBlock(
+			String name, int typeCode, 
+			LocalDate firstDate, LocalDate secondDate
+			) {
+		super(name, typeCode);
+		this.firstDate = firstDate;
+		this.secondDate = secondDate;
+	}
+
 	public LocalDate getFirstDate() {
 		return firstDate;
 	}

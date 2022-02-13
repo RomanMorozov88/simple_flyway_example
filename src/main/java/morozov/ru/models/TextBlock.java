@@ -11,6 +11,11 @@ public class TextBlock extends Block {
 		super();
 	}
 
+	public TextBlock(String name, int typeCode, String text) {
+		super(name, typeCode);
+		this.text = text;
+	}
+
 	public String getText() {
 		return text;
 	}

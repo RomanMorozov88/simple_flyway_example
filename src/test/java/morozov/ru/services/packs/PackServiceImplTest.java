@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 
 import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,135 @@ public class PackServiceImplTest {
 		
 		assertEquals(Integer.valueOf(1), result);
     }
+	
+	@Test
+	public void updatePackWithNewBlocks() {
+		Pack pack = this.createPack();
+		pack.setId(101);
+
+		Mockito.doNothing()
+        .when(packDao)
+        .updatePack(pack);
+		
+		Mockito.doReturn(null)
+		.when(transactionManager)
+		.getTransaction(ArgumentMatchers.any(DefaultTransactionDefinition.class));
+
+		packService.updatePack(pack);
+
+		Mockito.verify(packDao, Mockito.times(1))
+		.updatePack(pack);
+		Mockito.verify(blockService, Mockito.times(2))
+		.saveBlock(ArgumentMatchers.any(Block.class));
+		Mockito.verify(transactionManager, Mockito.times(1))
+		.commit(null);
+	}
+	
+	@Test
+	public void updatePack() {
+		Pack pack = this.createPack();
+		pack.setId(101);
+		int i = 10;
+		for (Block b : pack.getBlocks()) {
+			b.setId(i++);
+		}
+
+		Mockito.doNothing()
+        .when(packDao)
+        .updatePack(pack);
+		
+		Mockito.doReturn(null)
+		.when(transactionManager)
+		.getTransaction(ArgumentMatchers.any(DefaultTransactionDefinition.class));
+
+		packService.updatePack(pack);
+
+		Mockito.verify(packDao, Mockito.times(1))
+		.updatePack(pack);
+		Mockito.verify(blockService, Mockito.times(2))
+		.updateBlock(ArgumentMatchers.any(Block.class));
+		Mockito.verify(transactionManager, Mockito.times(1))
+		.commit(null);
+	}
+	
+	@Test
+	public void deletePack() {
+		Mockito.doNothing()
+        .when(packDao)
+        .deletePack(101);
+		
+		packService.deletePack(101);
+
+		Mockito.verify(packDao, Mockito.times(1))
+		.deletePack(101);
+	}
+	
+	@Test
+	public void getPack() {
+		Pack pack = new Pack();
+
+		Mockito.doReturn(pack)
+        .when(packDao)
+        .getPackById(ArgumentMatchers.anyInt());
+		
+		Mockito.doReturn(
+				Arrays.asList(
+						new TextBlock(),
+						new LocalDateBlock()
+						)
+				)
+		.when(blockService)
+		.getBlocksByIdPack(ArgumentMatchers.anyInt());
+		
+		Mockito.doReturn(null)
+		.when(transactionManager)
+		.getTransaction(ArgumentMatchers.any(DefaultTransactionDefinition.class));
+
+		Pack resultPack = packService.getPack(101);
+
+		Mockito.verify(packDao, Mockito.times(1))
+		.getPackById(101);
+		Mockito.verify(blockService, Mockito.times(1))
+		.getBlocksByIdPack(101);
+		Mockito.verify(transactionManager, Mockito.times(1))
+		.commit(null);
+		assertEquals(Integer.valueOf(2), resultPack.getBlocks().size());
+	}
+	
+	@Test
+	public void getPacks() {
+		List<Pack> packs = Arrays.asList(
+				new Pack(1, "first"), new Pack(2, "second")
+				);
+
+		Mockito.doReturn(packs)
+        .when(packDao)
+        .getPacks();
+		
+		Mockito.doReturn(
+				Arrays.asList(
+						new TextBlock(),
+						new LocalDateBlock()
+						)
+				)
+		.when(blockService)
+		.getBlocksByIdPack(ArgumentMatchers.anyInt());
+		
+		Mockito.doReturn(null)
+		.when(transactionManager)
+		.getTransaction(ArgumentMatchers.any(DefaultTransactionDefinition.class));
+
+		List<Pack> resultPacks = packService.getPacks();
+
+		Mockito.verify(packDao, Mockito.times(1))
+		.getPacks();
+		Mockito.verify(blockService, Mockito.times(2))
+		.getBlocksByIdPack(ArgumentMatchers.anyInt());
+		Mockito.verify(transactionManager, Mockito.times(1))
+		.commit(null);
+		assertEquals(Integer.valueOf(2), resultPacks.size());
+	}
+	
 	
 	private Pack createPack() {
 		Pack pack = new Pack();
